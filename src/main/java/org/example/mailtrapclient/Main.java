@@ -1,7 +1,16 @@
-package org.example;
+package org.example.mailtrapclient;
+
+import java.util.Collections;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        MailtrapEmailSender mailtrapSender = new MailtrapEmailSender(
+                "mailtrap@demomailtrap.com",
+                "basoy1988@example.com",
+                "Simple text message.",
+                "<b>Test HTML message</b>"
+        );
+
+        mailtrapSender.send(mailtrapSender.getSession());
     }
 }

@@ -1,33 +1,27 @@
-import org.example.mailtrapclient.MailtrapEmailSender;
+package org.example.mailtrapclient;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 class MailtrapEmailSenderTest {
 
     private MailtrapEmailSender emailSender;
-    private Session session;
-    private Transport transport;
 
     @BeforeEach
     void setUp() {
-        session = Session.getInstance(new Properties(), null);
-        transport = mock(Transport.class);
         emailSender = new MailtrapEmailSender(
                 "Sender Name", "sender@example.com",
                 "Recipient Name", "recipient@example.com",
@@ -50,7 +44,6 @@ class MailtrapEmailSenderTest {
 
     @Test
     void testSendEmail() throws MessagingException, IOException {
-        // Mock the session and transport
         Session session = spy(emailSender.getSession());
         Transport transport = mock(Transport.class);
         doNothing().when(transport).sendMessage(any(Message.class), any(Address[].class));
@@ -58,12 +51,10 @@ class MailtrapEmailSenderTest {
 
         emailSender.send(session);
 
-        // Capture the sent message
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
         verify(transport).sendMessage(messageCaptor.capture(), any(Address[].class));
         Message sentMessage = messageCaptor.getValue();
 
-        // Verify the message details
         assertEquals("sender@example.com", ((InternetAddress) sentMessage.getFrom()[0]).getAddress());
         assertEquals("recipient@example.com", ((InternetAddress) sentMessage.getAllRecipients()[0]).getAddress());
         assertEquals("Subject", sentMessage.getSubject());
@@ -88,10 +79,9 @@ class MailtrapEmailSenderTest {
                 "Sender Name", "sender@example.com",
                 "Recipient Name", "recipient@example.com",
                 "Subject", "Text content",
-                "HTML content", Arrays.asList()
+                "HTML content", List.of()
         );
 
-        // Mock the session and transport
         Session session = spy(emailSender.getSession());
         Transport transport = mock(Transport.class);
         doNothing().when(transport).sendMessage(any(Message.class), any(Address[].class));
@@ -99,12 +89,10 @@ class MailtrapEmailSenderTest {
 
         emailSender.send(session);
 
-        // Capture the sent message
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
         verify(transport).sendMessage(messageCaptor.capture(), any(Address[].class));
         Message sentMessage = messageCaptor.getValue();
 
-        // Verify the message details
         assertEquals("sender@example.com", ((InternetAddress) sentMessage.getFrom()[0]).getAddress());
         assertEquals("recipient@example.com", ((InternetAddress) sentMessage.getAllRecipients()[0]).getAddress());
         assertEquals("Subject", sentMessage.getSubject());
@@ -116,7 +104,7 @@ class MailtrapEmailSenderTest {
         assertEquals("Text content", textPart.getContent().toString());
 
         BodyPart htmlPart = multipart.getBodyPart(1);
-        assertEquals("text/html", htmlPart.getContentType());
+        assertEquals("text/html; charset=us-ascii", htmlPart.getContentType());
         assertEquals("HTML content", htmlPart.getContent().toString());
     }
 }
